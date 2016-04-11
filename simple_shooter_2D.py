@@ -24,6 +24,9 @@ class GameObject():
     def get_coords(self):
         return self._x, self._y
 
+    def get_round_coords(self):
+        return int(round(self._x)), int(round(self._y))
+
     def get_size(self):
         return self._size
 
@@ -75,7 +78,7 @@ class Player(GameObject):
 class Enemy(GameObject):
     def __init__(self, x, y, hp):
         GameObject.__init__(self, x, y)
-        self._speed = ENEMYSPEED
+        self._speed = ENEMYSPEED / FPS
         self._dx = 0
         self._dy = 0
         self._hit_target = False
@@ -83,13 +86,14 @@ class Enemy(GameObject):
         self._size = ENEMY_IMG.get_size()[0]
 
     def on(self):
-        DISPLAYSURF.blit(ENEMY_IMG, (self.get_coords()))
+        DISPLAYSURF.blit(ENEMY_IMG, (self.get_round_coords()))
 
     def off(self):
-        pygame.draw.rect(DISPLAYSURF, WHITE, (self._x, self._y, self._size,
-        self._size))
+        x, y = self.get_round_coords()
+        pygame.draw.rect(DISPLAYSURF, WHITE, (x, y, self._size, self._size))
 
     def set_move_target(self, targetx, targety):
+        """ Set coords of target, which move to """
         self._move_tx = targetx
         self._move_ty = targety
 
@@ -104,8 +108,8 @@ class Enemy(GameObject):
             self._hit_target = False
         if not self._hit_target:
             angle = math.atan2(self._move_ty - y, self._move_tx - x)
-            self._dx = int(round(self._speed * math.cos(angle)))
-            self._dy = int(round(self._speed * math.sin(angle)))
+            self._dx = self._speed * math.cos(angle)
+            self._dy = self._speed * math.sin(angle)
         self._set_coords(x + self._dx, y + self._dy)
         self.on()
 
@@ -146,17 +150,30 @@ class Bullet(GameObject):
 
 
 def is_out_of_window(obj):
+    """ Verifies if any object is out of game window """
     x, y = obj.get_coords()
     if x < 0 or x > WINDOWWIDTH or y < 0 or y > WINDOWHEIGHT:
         return True
     return False
 
 def terminate():
+    """ Stop game """
     pygame.quit()
     sys.exit()
 
 def enemy_placing():
-    places = ('topleft', 'topmid', 'topright', 'midleft', 'midright', 'bottomleft', 'bottommid', 'bottomright')
+    """ Place each new enemy into random part of game field.
+
+        Possible places:
+        | topleft | topmid | topright |
+        ------------------------------
+        | midleft |        | midright |
+        ------------------------------
+        | botleft | botmid | botright |
+    """
+    places = ('topleft', 'topmid', 'topright',
+              'midleft', 'midright',
+              'bottomleft', 'bottommid', 'bottomright')
     place = choice(places)
     if place == 'topleft':
         x = randint(0, WINDOWWIDTH / 3)
@@ -186,6 +203,9 @@ def enemy_placing():
     return enemy
 
 def check_hits(bullets, enemies):
+    """ Verifies if any bullet hit any enemy.
+        Destroys corresponding bullet and enemy on collision.
+    """
     for bullet in bullets:
         for enemy in enemies:
             bx, by = bullet.get_coords()
