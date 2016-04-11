@@ -33,11 +33,10 @@ class Player(GameObject):
         GameObject.__init__(self, x, y)
         self._move_directions = []
         self.shooting = False
-        self._size = PLAYERSIZE
+        self._size = PLAYER_IMG.get_size()[0]
 
     def on(self):
-        pygame.draw.rect(DISPLAYSURF, GREEN, (self._x, self._y, PLAYERSIZE,
-        PLAYERSIZE))
+        DISPLAYSURF.blit(PLAYER_IMG, (self.get_coords()))
 
     def off(self):
         pygame.draw.rect(DISPLAYSURF, WHITE, (self._x, self._y, PLAYERSIZE,
