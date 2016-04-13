@@ -21,9 +21,11 @@ PLAYERSTARTPOSITION = (400, 300)
 PLAYERSIZE = 10
 PLAYERSPEED = 1
 PLAYERHITPOINTS = 100
-PLAYER_IMG = image.load('image/nja1_fr1.gif')
+PLAYER_IMG = image.load('image/nja1_fr1.png')
 
 ENEMYSPEED = float(10)
 ENEMYHITPOINTS = 1
 ENEMY_SPAWN_TIME = FPS * 5
-ENEMY_IMG = image.load('image/dvl1_fr1.gif')
+ENEMY_IMG = image.load('image/dvl1_fr1.png')
+
+TERRAIN_IMG = image.load('image/ground2.jpg')

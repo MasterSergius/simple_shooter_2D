@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import math
 import pygame
 import sys
@@ -52,7 +55,6 @@ class Player(GameObject):
         self._move_directions.remove(direction)
 
     def move(self):
-        self.off()
         x, y = self.get_coords()
         self._dx = 0
         self._dy = 0
@@ -66,7 +68,6 @@ class Player(GameObject):
             if direction == 'right':
                 self._dx = PLAYERSPEED
         self._set_coords(x + self._dx, y + self._dy)
-        self.on()
 
     def set_shooting(self, status):
         self.shooting = status
@@ -98,7 +99,6 @@ class Enemy(GameObject):
         self._move_ty = targety
 
     def move(self):
-        self.off()
         x, y = self.get_coords()
         if abs((self._move_tx - x) * (self._move_ty - y)) < self._size:
             self._hit_target = True
@@ -111,7 +111,6 @@ class Enemy(GameObject):
             self._dx = self._speed * math.cos(angle)
             self._dy = self._speed * math.sin(angle)
         self._set_coords(x + self._dx, y + self._dy)
-        self.on()
 
     def take_damage(self, damage):
         self._hp -= damage
@@ -137,7 +136,6 @@ class Bullet(GameObject):
         pygame.draw.circle(DISPLAYSURF, WHITE, (self._x, self._y), BULLETSIZE)
 
     def move(self):
-        self.off()
         x, y = self.get_coords()
         if abs((self._tx - x) * (self._ty - y)) < BULLETSPEED * BULLETSPEED:
             self._hit_target = True
@@ -146,7 +144,6 @@ class Bullet(GameObject):
             self._dx = int(round(self._speed * math.cos(angle)))
             self._dy = int(round(self._speed * math.sin(angle)))
         self._set_coords(x + self._dx, y + self._dy)
-        self.on()
 
 
 def is_out_of_window(obj):
@@ -238,7 +235,7 @@ def main():
         if clock_enemies_spawn >= ENEMY_SPAWN_TIME:
             clock_enemies_spawn = 0
             enemies.append(enemy_placing())
-        DISPLAYSURF.fill(WHITE)
+        DISPLAYSURF.blit(TERRAIN_IMG, (0, 0))
         player.on()
         playerx, playery = player.get_coords()
         # get and handle events
@@ -286,6 +283,7 @@ def main():
         for enemy in enemies:
             enemy.set_move_target(playerx, playery)
             enemy.move()
+            DISPLAYSURF.blit( ENEMY_IMG, (enemy.get_round_coords()) )
         check_hits(bullets, enemies)
         pygame.display.update()
         FPSCLOCK.tick(FPS)
