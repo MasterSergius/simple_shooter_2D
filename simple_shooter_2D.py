@@ -137,6 +137,7 @@ class GameLogic(object):
         self.bullets = []
         self.player = Player(PLAYERSTARTPOSITION[0], PLAYERSTARTPOSITION[1])
         clock_enemies_spawn = 0
+        firerate_counter = FIRERATE
         while True:
             # Spawn a new enemy after set time periods
             clock_enemies_spawn += 1
@@ -170,8 +171,6 @@ class GameLogic(object):
                         self.player.end_move('right')
                 elif event.type == MOUSEBUTTONDOWN:
                     self.player.set_shooting(True)
-                    mousex, mousey = event.pos
-                    self.bullets.append(Bullet(playerx, playery, mousex, mousey, BULLETDAMAGE))
                 elif event.type == MOUSEBUTTONUP:
                     self.player.set_shooting(False)
             # draw background
@@ -179,8 +178,10 @@ class GameLogic(object):
             # actions per frame
             playerx, playery = self.player.get_coords()
             if self.player.get_shooting():
-                mousex, mousey = pygame.mouse.get_pos()
-                self.bullets.append(Bullet(playerx, playery, mousex, mousey, BULLETDAMAGE))
+                if firerate_counter >= FIRERATE:
+                    firerate_counter = 0
+                    mousex, mousey = pygame.mouse.get_pos()
+                    self.bullets.append(Bullet(playerx, playery, mousex, mousey, BULLETDAMAGE))
             for bullet in self.bullets:
                 bullet.move()
                 # remove bullet from list, if bullet is out of window
@@ -196,6 +197,9 @@ class GameLogic(object):
             # draw enemies, player and bullets
             self.displaysurf.blit(PLAYER_IMG, (self.player.get_coords()))
             pygame.display.update()
+            firerate_counter += 1
+            if firerate_counter > FIRERATE:
+                firerate_counter = FIRERATE
             self.fpsclock.tick(FPS)
 
     def is_obj_collision(self, obj1, obj2):
