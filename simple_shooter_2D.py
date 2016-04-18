@@ -131,6 +131,7 @@ class GameLogic(object):
         pygame.display.set_caption('Simple shooting')
         self.game_time = 0
         self.time_text = '0:00'
+        self.enemy_kills = 0
 
     def handle_events(self):
         """ Get and handle events (keyboard, mouse, etc.) """
@@ -203,10 +204,14 @@ class GameLogic(object):
                 enemy.move()
                 self.displaysurf.blit( ENEMY_IMG, (enemy.get_round_coords()) )
             self.check_hits()
-            # draw enemies, player and bullets
+            # draw player, stats, etc.
             self.displaysurf.blit(PLAYER_IMG, (self.player.get_coords()))
             self.displaysurf.blit(self.font.render(self.time_text, True,
                                                    (YELLOW)), (20, 10))
+            text_kills = 'Kills: %s' % self.enemy_kills
+            self.displaysurf.blit(self.font.render(text_kills, True,
+                                                   (YELLOW)),
+                                                   (WINDOWWIDTH - 100, 10))
             pygame.display.update()
             firerate_counter += 1
             if firerate_counter > FIRERATE:
@@ -251,6 +256,7 @@ class GameLogic(object):
                    self.is_obj_collision(bullet, enemy):
                     bullets_to_remove.append(bullet)
                     enemies_to_remove.append(enemy)
+                    self.enemy_kills += 1
         for bullet in bullets_to_remove:
             self.bullets.remove(bullet)
         for enemy in enemies_to_remove:
