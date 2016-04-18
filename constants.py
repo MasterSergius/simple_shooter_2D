@@ -27,7 +27,7 @@ PLAYER_IMG = image.load('image/nja1_fr1.png')
 ENEMYSPEED = float(10)
 ENEMYHITPOINTS = 1
 ENEMY_INITIAL_COUNT = 20
-ENEMY_SPAWN_TIME = FPS * 2
+ENEMY_SPAWN_TIME = FPS
 ENEMY_IMG = image.load('image/dvl1_fr1.png')
 
 TERRAIN_IMG = image.load('image/ground2.jpg')

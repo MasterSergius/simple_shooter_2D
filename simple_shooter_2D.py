@@ -255,39 +255,43 @@ class GameLogic(object):
 
             Possible places:
             | topleft | topmid | topright |
-            ------------------------------
+            -------------------------------
             | midleft |        | midright |
-            ------------------------------
+            -------------------------------
             | botleft | botmid | botright |
         """
+        # set size of this grid
+        GRID_SIZE = 15
+        CELL_WIDTH = WINDOWWIDTH / GRID_SIZE
+        CELL_HEIGHT = WINDOWHEIGHT / GRID_SIZE
         places = ('topleft', 'topmid', 'topright',
                   'midleft', 'midright',
                   'bottomleft', 'bottommid', 'bottomright')
         place = choice(places)
         if place == 'topleft':
-            x = randint(0, WINDOWWIDTH / 3)
-            y = randint(0, WINDOWHEIGHT / 3)
+            x = randint(0, CELL_WIDTH)
+            y = randint(0, CELL_HEIGHT)
         if place == 'topmid':
-            x = randint(WINDOWWIDTH / 3, 2 * WINDOWWIDTH / 3)
-            y = randint(0, WINDOWHEIGHT / 3)
+            x = randint(CELL_WIDTH, WINDOWWIDTH - CELL_WIDTH)
+            y = randint(0, CELL_HEIGHT)
         if place == 'topright':
-            x = randint(2 * WINDOWWIDTH / 3, WINDOWWIDTH)
-            y = randint(0, WINDOWHEIGHT / 3)
+            x = randint(WINDOWWIDTH - CELL_WIDTH, WINDOWWIDTH)
+            y = randint(0, CELL_HEIGHT)
         if place == 'midleft':
-            x = randint(0, WINDOWWIDTH / 3)
-            y = randint(WINDOWHEIGHT / 3, 2 * WINDOWHEIGHT / 3)
+            x = randint(0, CELL_WIDTH)
+            y = randint(CELL_HEIGHT, WINDOWHEIGHT - CELL_HEIGHT)
         if place == 'midright':
-            x = randint(2 * WINDOWWIDTH / 3, WINDOWWIDTH)
-            y = randint(WINDOWHEIGHT / 3, 2 * WINDOWHEIGHT / 3)
+            x = randint(WINDOWWIDTH - CELL_WIDTH, WINDOWWIDTH)
+            y = randint(CELL_HEIGHT, WINDOWHEIGHT - CELL_HEIGHT)
         if place == 'bottomleft':
-            x = randint(0, WINDOWWIDTH / 3)
-            y = randint(2 * WINDOWHEIGHT / 3, WINDOWHEIGHT)
+            x = randint(0, CELL_WIDTH)
+            y = randint(WINDOWHEIGHT - CELL_HEIGHT, WINDOWHEIGHT)
         if place == 'bottommid':
-            x = randint(WINDOWWIDTH / 3, 2 * WINDOWWIDTH / 3)
-            y = randint(2 * WINDOWHEIGHT / 3, WINDOWHEIGHT)
+            x = randint(CELL_WIDTH, WINDOWWIDTH - CELL_WIDTH)
+            y = randint(WINDOWHEIGHT - CELL_HEIGHT, WINDOWHEIGHT)
         if place == 'bottomright':
-            x = randint(2 * WINDOWWIDTH / 3, WINDOWWIDTH)
-            y = randint(2 * WINDOWHEIGHT / 3, WINDOWHEIGHT)
+            x = randint(WINDOWWIDTH - CELL_WIDTH, WINDOWWIDTH)
+            y = randint(WINDOWHEIGHT - CELL_HEIGHT, WINDOWHEIGHT)
         enemy = Enemy(x, y, ENEMYHITPOINTS)
         return enemy
 
