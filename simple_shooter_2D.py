@@ -130,6 +130,36 @@ class GameLogic(object):
         self.font = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
         pygame.display.set_caption('Simple shooting')
 
+    def handle_events(self):
+        """ Get and handle events (keyboard, mouse, etc.) """
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                terminate()
+            elif event.type == KEYDOWN:
+                if event.key in (K_UP, K_w):
+                    self.player.start_move('up')
+                if event.key in (K_DOWN, K_s):
+                    self.player.start_move('down')
+                if event.key in (K_LEFT, K_a):
+                    self.player.start_move('left')
+                if event.key in (K_RIGHT, K_d):
+                    self.player.start_move('right')
+            elif event.type == KEYUP:
+                if event.key == K_ESCAPE:
+                    terminate()
+                if event.key in (K_UP, K_w):
+                    self.player.end_move('up')
+                if event.key in (K_DOWN, K_s):
+                    self.player.end_move('down')
+                if event.key in (K_LEFT, K_a):
+                    self.player.end_move('left')
+                if event.key in (K_RIGHT, K_d):
+                    self.player.end_move('right')
+            elif event.type == MOUSEBUTTONDOWN:
+                self.player.set_shooting(True)
+            elif event.type == MOUSEBUTTONUP:
+                self.player.set_shooting(False)
+
     def start(self):
         """ Run game """
         self.enemies = [self.enemy_placing()
@@ -139,43 +169,17 @@ class GameLogic(object):
         clock_enemies_spawn = 0
         firerate_counter = FIRERATE
         while True:
+            self.handle_events()
             # Spawn a new enemy after set time periods
             clock_enemies_spawn += 1
             if clock_enemies_spawn >= ENEMY_SPAWN_TIME:
                 clock_enemies_spawn = 0
                 self.enemies.append(self.enemy_placing())
 
-            # get and handle events
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    terminate()
-                elif event.type == KEYDOWN:
-                    if event.key in (K_UP, K_w):
-                        self.player.start_move('up')
-                    if event.key in (K_DOWN, K_s):
-                        self.player.start_move('down')
-                    if event.key in (K_LEFT, K_a):
-                        self.player.start_move('left')
-                    if event.key in (K_RIGHT, K_d):
-                        self.player.start_move('right')
-                elif event.type == KEYUP:
-                    if event.key == K_ESCAPE:
-                        terminate()
-                    if event.key in (K_UP, K_w):
-                        self.player.end_move('up')
-                    if event.key in (K_DOWN, K_s):
-                        self.player.end_move('down')
-                    if event.key in (K_LEFT, K_a):
-                        self.player.end_move('left')
-                    if event.key in (K_RIGHT, K_d):
-                        self.player.end_move('right')
-                elif event.type == MOUSEBUTTONDOWN:
-                    self.player.set_shooting(True)
-                elif event.type == MOUSEBUTTONUP:
-                    self.player.set_shooting(False)
             # draw background
             self.displaysurf.blit(TERRAIN_IMG, (0, 0))
-            # actions per frame
+
+            # move player, enemies, bullets
             playerx, playery = self.player.get_coords()
             if self.player.get_shooting():
                 if firerate_counter >= FIRERATE:
