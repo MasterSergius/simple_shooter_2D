@@ -36,6 +36,7 @@ class Player(GameObject):
         self._move_directions = []
         self.shooting = False
         self._width, self._height = PLAYER_IMG.get_size()
+        self._hp = PLAYERHITPOINTS
 
     def start_move(self, direction):
         self._move_directions.append(direction)
@@ -63,6 +64,12 @@ class Player(GameObject):
 
     def get_shooting(self):
         return self.shooting
+
+    def take_damage(self, damage):
+        self._hp -= damage
+
+    def is_alive(self):
+        return self._hp > 0
 
 
 class Enemy(GameObject):
@@ -204,6 +211,7 @@ class GameLogic(object):
                 enemy.move()
                 self.displaysurf.blit( ENEMY_IMG, (enemy.get_round_coords()) )
             self.check_hits()
+            self.check_player_get_damage()
             # draw player, stats, etc.
             self.displaysurf.blit(PLAYER_IMG, (self.player.get_coords()))
             self.displaysurf.blit(self.font.render(self.time_text, True,
@@ -213,9 +221,24 @@ class GameLogic(object):
                                                    (YELLOW)),
                                                    (WINDOWWIDTH - 100, 10))
             pygame.display.update()
+            if not self.player.is_alive():
+                break
             firerate_counter += 1
             if firerate_counter > FIRERATE:
                 firerate_counter = FIRERATE
+            self.fpsclock.tick(FPS)
+        # game over
+        self.displaysurf.blit(TERRAIN_IMG, (0, 0))
+        text_game_over = "GAME OVER"
+        self.displaysurf.blit(self.font.render(text_game_over, True,
+                                               (YELLOW)),
+                                               (WINDOWWIDTH / 2 - 30,
+                                                WINDOWHEIGHT / 2 - 10))
+        pygame.display.update()
+        while True:
+            event = pygame.event.wait()
+            if event.type == QUIT:
+                terminate()
             self.fpsclock.tick(FPS)
 
     def update_timer(self):
@@ -236,7 +259,7 @@ class GameLogic(object):
         w2, h2 = obj2.get_size()
 
         # rough calculation, needs improvement
-        distance = w1 + w2
+        distance = (w1 + w2) * 0.8
         x1 = x1 + w1 / 2
         y1 = y1 + h1 / 2
         x2 = x2 + w2 / 2
@@ -261,6 +284,11 @@ class GameLogic(object):
             self.bullets.remove(bullet)
         for enemy in enemies_to_remove:
             self.enemies.remove(enemy)
+
+    def check_player_get_damage(self):
+        for enemy in self.enemies:
+            if self.is_obj_collision(enemy, self.player):
+                self.player.take_damage(ENEMY_DAMAGE)
 
     def is_out_of_window(self, obj):
         """ Verifies if any object is out of game window """
