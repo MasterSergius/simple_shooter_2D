@@ -127,8 +127,10 @@ class GameLogic(object):
         pygame.init()
         self.displaysurf = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
         self.fpsclock = pygame.time.Clock()
-        self.font = pygame.font.Font('freesansbold.ttf', BASICFONTSIZE)
+        self.font = pygame.font.SysFont('arial', BASICFONTSIZE)
         pygame.display.set_caption('Simple shooting')
+        self.game_time = 0
+        self.time_text = '0:00'
 
     def handle_events(self):
         """ Get and handle events (keyboard, mouse, etc.) """
@@ -159,6 +161,8 @@ class GameLogic(object):
                 self.player.set_shooting(True)
             elif event.type == MOUSEBUTTONUP:
                 self.player.set_shooting(False)
+            elif event.type == USEREVENT+1:
+                self.update_timer()
 
     def start(self):
         """ Run game """
@@ -168,6 +172,7 @@ class GameLogic(object):
         self.player = Player(PLAYERSTARTPOSITION[0], PLAYERSTARTPOSITION[1])
         clock_enemies_spawn = 0
         firerate_counter = FIRERATE
+        pygame.time.set_timer(USEREVENT+1, 1000)
         while True:
             self.handle_events()
             # Spawn a new enemy after set time periods
@@ -200,11 +205,19 @@ class GameLogic(object):
             self.check_hits()
             # draw enemies, player and bullets
             self.displaysurf.blit(PLAYER_IMG, (self.player.get_coords()))
+            self.displaysurf.blit(self.font.render(self.time_text, True,
+                                                   (YELLOW)), (20, 10))
             pygame.display.update()
             firerate_counter += 1
             if firerate_counter > FIRERATE:
                 firerate_counter = FIRERATE
             self.fpsclock.tick(FPS)
+
+    def update_timer(self):
+        self.game_time += 1
+        mm = self.game_time / 60
+        ss = self.game_time % 60
+        self.time_text = '%s:%s' % (mm, str(ss).zfill(2))
 
     def is_obj_collision(self, obj1, obj2):
         """ Verifies if obj1 and obj2 collide with each other
