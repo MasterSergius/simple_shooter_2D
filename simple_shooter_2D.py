@@ -159,7 +159,7 @@ class GameLogic(object):
                     self.player.start_move('right')
             elif event.type == KEYUP:
                 if event.key == K_ESCAPE:
-                    terminate()
+                    self.show_menu(pause=True)
                 if event.key in (K_UP, K_w):
                     self.player.end_move('up')
                 if event.key in (K_DOWN, K_s):
@@ -175,8 +175,35 @@ class GameLogic(object):
             elif event.type == USEREVENT+1:
                 self.update_timer()
 
+    def show_menu(self, pause=False):
+        """ Shows game menu """
+        self.displaysurf.blit(TERRAIN_IMG, (0, 0))
+        text_play = "RESUME" if pause else "PLAY"
+        text_exit = "EXIT"
+        rendered_text_play = self.font.render(text_play, True, (YELLOW))
+        rendered_text_exit = self.font.render(text_exit, True, (YELLOW))
+        pw, ph = rendered_text_play.get_size()
+        px = WINDOWWIDTH / 2 - pw / 2
+        py = WINDOWHEIGHT / 2 - ph - 10
+        self.displaysurf.blit(rendered_text_play, (px, py))
+        ew, eh = rendered_text_exit.get_size()
+        ex = WINDOWWIDTH / 2 - ew / 2
+        ey = WINDOWHEIGHT / 2 + eh + 10
+        self.displaysurf.blit(rendered_text_exit, (ex, ey))
+        pygame.display.update()
+        while True:
+            event = pygame.event.wait()
+            if event.type == MOUSEBUTTONDOWN:
+                mousex, mousey = pygame.mouse.get_pos()
+                if self.mouse_in_rect((mousex, mousey), (px, py, pw, ph)):
+                    return pause
+                if self.mouse_in_rect((mousex, mousey), (ex, ey, ew, eh)):
+                    terminate()
+            self.fpsclock.tick(FPS)
+
     def start(self):
         """ Run game """
+        self.show_menu()
         # create initial enemies
         self.enemies = []
         speed = ENEMYSPEED / FPS
@@ -256,6 +283,20 @@ class GameLogic(object):
         mm = self.game_time / 60
         ss = self.game_time % 60
         self.time_text = '%s:%s' % (mm, str(ss).zfill(2))
+
+    def mouse_in_rect(self, mouse, rect):
+        """ Verifies if mouse inside rect.
+
+            Params:
+                mouse - tuple (x, y)
+                rect - represented by tuple (x, y, w, h),
+                       where (x, y) - coords of left top corner and
+                       (w, h) - width and height of rect
+        """
+        mousex, mousey = mouse
+        x, y, w, h = rect
+        return mousex >= x and mousex <= x + w and \
+               mousey >= y and mousey <= y + h
 
     def is_obj_collision(self, obj1, obj2):
         """ Verifies if obj1 and obj2 collide with each other
