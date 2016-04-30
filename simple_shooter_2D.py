@@ -42,7 +42,8 @@ class Player(GameObject):
         self._move_directions.append(direction)
 
     def end_move(self, direction):
-        self._move_directions.remove(direction)
+        if direction in self._move_directions:
+            self._move_directions.remove(direction)
 
     def move(self):
         x, y = self.get_coords()
@@ -73,14 +74,16 @@ class Player(GameObject):
 
 
 class Enemy(GameObject):
-    def __init__(self, x, y, hp):
+    def __init__(self, x, y, hp, speed, dmg, img):
         GameObject.__init__(self, x, y)
-        self._speed = ENEMYSPEED / FPS
         self._dx = 0
         self._dy = 0
         self._hit_target = False
         self._hp = hp
-        self._width, self._height = ENEMY_IMG.get_size()
+        self._speed = speed
+        self._dmg = dmg
+        self._img = img
+        self._width, self._height = img.get_size()
 
     def set_move_target(self, targetx, targety):
         """ Set coords of target, which move to """
@@ -174,8 +177,13 @@ class GameLogic(object):
 
     def start(self):
         """ Run game """
-        self.enemies = [self.enemy_placing()
-                        for i in range(ENEMY_INITIAL_COUNT)]
+        # create initial enemies
+        self.enemies = []
+        speed = ENEMYSPEED / FPS
+        for i in range(ENEMY_INITIAL_COUNT):
+            x, y = self.enemy_placing()
+            self.enemies.append(Enemy(x, y, ENEMYHITPOINTS, speed,
+                                      ENEMY_DAMAGE, ENEMY_IMG))
         self.bullets = []
         self.player = Player(PLAYERSTARTPOSITION[0], PLAYERSTARTPOSITION[1])
         clock_enemies_spawn = 0
@@ -187,7 +195,9 @@ class GameLogic(object):
             clock_enemies_spawn += 1
             if clock_enemies_spawn >= ENEMY_SPAWN_TIME:
                 clock_enemies_spawn = 0
-                self.enemies.append(self.enemy_placing())
+                x, y = self.enemy_placing()
+                self.enemies.append(Enemy(x, y, ENEMYHITPOINTS, speed,
+                                          ENEMY_DAMAGE, ENEMY_IMG))
 
             # draw background
             self.displaysurf.blit(TERRAIN_IMG, (0, 0))
@@ -298,7 +308,7 @@ class GameLogic(object):
         return False
 
     def enemy_placing(self):
-        """ Place each new enemy into random part of game field.
+        """ Returns coords (x,y) in random part of game field.
 
             Possible places:
             | topleft | topmid | topright |
@@ -339,8 +349,7 @@ class GameLogic(object):
         if place == 'bottomright':
             x = randint(WINDOWWIDTH - CELL_WIDTH, WINDOWWIDTH)
             y = randint(WINDOWHEIGHT - CELL_HEIGHT, WINDOWHEIGHT)
-        enemy = Enemy(x, y, ENEMYHITPOINTS)
-        return enemy
+        return (x, y)
 
 
 def terminate():
