@@ -159,7 +159,7 @@ class GameLogic(object):
                     self.player.start_move('right')
             elif event.type == KEYUP:
                 if event.key == K_ESCAPE:
-                    self.show_menu(pause=True)
+                    self.show_menu(state="pause")
                 if event.key in (K_UP, K_w):
                     self.player.end_move('up')
                 if event.key in (K_DOWN, K_s):
@@ -175,11 +175,17 @@ class GameLogic(object):
             elif event.type == USEREVENT+1:
                 self.update_timer()
 
-    def show_menu(self, pause=False):
+    def show_menu(self, state="init"):
         """ Shows game menu """
         self.displaysurf.blit(TERRAIN_IMG, (0, 0))
-        text_play = "RESUME" if pause else "PLAY"
         text_exit = "EXIT"
+        if state == "init":
+            text_play = "PLAY"
+        elif state == "pause":
+            text_play = "RESUME"
+        elif state == "end":
+            text_play = "SCORE: %s" % (self.game_time * self.enemy_kills)
+            text_exit = "GAME OVER"
         rendered_text_play = self.font.render(text_play, True, (YELLOW))
         rendered_text_exit = self.font.render(text_exit, True, (YELLOW))
         pw, ph = rendered_text_play.get_size()
@@ -196,7 +202,7 @@ class GameLogic(object):
             if event.type == MOUSEBUTTONDOWN:
                 mousex, mousey = pygame.mouse.get_pos()
                 if self.mouse_in_rect((mousex, mousey), (px, py, pw, ph)):
-                    return pause
+                    return state
                 if self.mouse_in_rect((mousex, mousey), (ex, ey, ew, eh)):
                     terminate()
             self.fpsclock.tick(FPS)
@@ -222,9 +228,10 @@ class GameLogic(object):
             clock_enemies_spawn += 1
             if clock_enemies_spawn >= ENEMY_SPAWN_TIME:
                 clock_enemies_spawn = 0
-                x, y = self.enemy_placing()
-                self.enemies.append(Enemy(x, y, ENEMYHITPOINTS, speed,
-                                          ENEMY_DAMAGE, ENEMY_IMG))
+                for counter in range(ENEMY_SPAWN_COUNT):
+                    x, y = self.enemy_placing()
+                    self.enemies.append(Enemy(x, y, ENEMYHITPOINTS, speed,
+                                              ENEMY_DAMAGE, ENEMY_IMG))
 
             # draw background
             self.displaysurf.blit(TERRAIN_IMG, (0, 0))
@@ -265,18 +272,7 @@ class GameLogic(object):
                 firerate_counter = FIRERATE
             self.fpsclock.tick(FPS)
         # game over
-        self.displaysurf.blit(TERRAIN_IMG, (0, 0))
-        text_game_over = "GAME OVER"
-        self.displaysurf.blit(self.font.render(text_game_over, True,
-                                               (YELLOW)),
-                                               (WINDOWWIDTH / 2 - 30,
-                                                WINDOWHEIGHT / 2 - 10))
-        pygame.display.update()
-        while True:
-            event = pygame.event.wait()
-            if event.type == QUIT:
-                terminate()
-            self.fpsclock.tick(FPS)
+        self.show_menu(state="end")
 
     def update_timer(self):
         self.game_time += 1
